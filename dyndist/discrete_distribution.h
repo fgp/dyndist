@@ -1574,7 +1574,7 @@ public:
     /*
      * Verification
      */
-#if DYNDIST_IFASSERT
+#if DYNDIST_IFVERIFY
     void verify_consistency() const;
     
     void verify_meta_consistency();
@@ -3310,7 +3310,7 @@ const
 
 #endif /* DYNDIST_IFSTATS */
 
-#if DYNDIST_IFASSERT
+#if DYNDIST_IFVERIFY
 
 template<typename S,typename W,typename D,typename C>
 void
@@ -3532,7 +3532,7 @@ discrete_distribution<S,W,D,C>::verify_meta_consistency()
     }
 }
 
-#endif /* DYNDIST_IFASSERT */
+#endif /* DYNDIST_IFVERIFY */
     
 DYNDIST_NAMESPACE_END
 
