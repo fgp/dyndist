@@ -88,13 +88,14 @@ BOOST_AUTO_TEST_CASE(chisquared_test)
     uniform_int_distribution<uint64_t> dist_key(0,N-1);
     uniform_int_distribution<uint64_t> dist_weight(1, 1000);
 
-    vector_distribution<uint64_t> p(N, 0);
+    typedef vector_distribution<uint64_t> dist_t;
+    dist_t p(N, 0);
     std::vector<uint64_t> obs;
 
     for(std::size_t m=0; m < M; ++m) {
         /* Re-assign weights */
-        for (std::size_t i = 0; i < N; ++i) {
-            p[dist_key(rng)] = dist_weight(rng);
+        for (dist_t::iterator p_i = p.begin(); p_i != p.end(); ++p_i) {
+            *p_i = dist_weight(rng);
         }
 
         /* Samples B times */
@@ -105,12 +106,12 @@ BOOST_AUTO_TEST_CASE(chisquared_test)
         /* Check that the empirical and expected distributions are similar */
         double x = 0;
         int df = -1;
-        for (std::size_t i = 0; i < N; ++i) {
-            if (p[i] == 0)
+        for (dist_t::const_iterator p_i = p.cbegin(); p_i != p.cend(); ++p_i) {
+            if (*p_i == 0)
                 continue;
 
-            const double m = (double) p[i] * S / p.weight();
-            x += std::pow((double)obs[i] - m, 2) / m;
+            const double m = (double) *p_i * S / p.weight();
+            x += std::pow((double)obs[p_i - p.begin()] - m, 2) / m;
             ++df;
         }
 
