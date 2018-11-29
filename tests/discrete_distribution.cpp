@@ -219,7 +219,7 @@ struct uniform_distribution< flavoured_weight<V>, Engine >
 DYNDIST_NAMESPACE_END
 
 template<typename WeightType>
-struct vector_distribution_types
+struct discrete_distribution_testimpl_types
 {
     typedef dyndist::discrete_distribution_pointer
     <std::size_t, WeightType, std::size_t>
@@ -251,12 +251,12 @@ struct vector_distribution_types
 };
 
 template<typename WeightType>
-class vector_distribution
-    :public vector_distribution_types<WeightType>::distribution_type
+class discrete_distribution_testimpl
+    :public discrete_distribution_testimpl_types<WeightType>::distribution_type
 {
-    typedef typename vector_distribution_types<WeightType>::distribution_type super_type;
+    typedef typename discrete_distribution_testimpl_types<WeightType>::distribution_type super_type;
     
-    typedef typename vector_distribution_types<WeightType>::events_type events_type;
+    typedef typename discrete_distribution_testimpl_types<WeightType>::events_type events_type;
     
 public:
     typedef typename super_type::value_type value_type;
@@ -265,8 +265,8 @@ public:
     
     typedef typename super_type::weight_type weight_type;
     
-    vector_distribution()
-        :super_type(typename vector_distribution_types<WeightType>::
+    discrete_distribution_testimpl()
+        :super_type(typename discrete_distribution_testimpl_types<WeightType>::
                     event_moved_callback(m_events))
     {}
     
@@ -291,7 +291,7 @@ private:
 
 template<typename W>
 void
-vector_distribution<W>::set(std::size_t index, const weight_type& weight)
+discrete_distribution_testimpl<W>::set(std::size_t index, const weight_type& weight)
 {
     if (index >= m_events.size())
         m_events.resize(index + 1);
@@ -313,7 +313,7 @@ vector_distribution<W>::set(std::size_t index, const weight_type& weight)
 
 template<typename W>
 void
-vector_distribution<W>::erase(std::size_t index)
+discrete_distribution_testimpl<W>::erase(std::size_t index)
 {
     if (index >= m_events.size())
         return;
@@ -332,7 +332,7 @@ vector_distribution<W>::erase(std::size_t index)
 template<typename W>
 template<typename Engine>
 std::size_t
-vector_distribution<W>::operator()(Engine& engine)
+discrete_distribution_testimpl<W>::operator()(Engine& engine)
 {
     const pointer s = super_type::operator()(engine);
     DYNDIST_ASSERT(m_events[s->data] == s);
@@ -343,7 +343,7 @@ vector_distribution<W>::operator()(Engine& engine)
 
 template<typename W>
 void
-vector_distribution<W>::verify_consistency()
+discrete_distribution_testimpl<W>::verify_consistency()
 {
     super_type::verify_consistency();
     
@@ -431,7 +431,7 @@ namespace {
     {
         typedef flavoured_weight<unsigned int> weight_type;
         weight_flavour flavour;
-        vector_distribution<weight_type> dist;
+        discrete_distribution_testimpl<weight_type> dist;
         dist.force_meta(use_meta ? 1 : -1);
         
         BOOST_CHECK(dist.weight() == weight_type());
@@ -490,7 +490,7 @@ namespace {
     void test_set(bool use_meta)
     {
         mt19937 rng;
-        vector_distribution<unsigned int> dist;
+        discrete_distribution_testimpl<unsigned int> dist;
         dist.force_meta(use_meta ? 1 : -1);
 
         test_iteration(dist);
@@ -570,7 +570,7 @@ namespace {
         using namespace dyndist;
         
         mt19937 rng;
-        vector_distribution<uint64_t> dist;
+        discrete_distribution_testimpl<uint64_t> dist;
         dist.force_meta(use_meta ? 1 : -1);
         
         dist.set(0, 256);
@@ -653,7 +653,7 @@ namespace {
         using namespace dyndist;
         
         mt19937 rng;
-        vector_distribution<std::size_t> dist;
+        discrete_distribution_testimpl<std::size_t> dist;
         dist.force_meta(use_meta ? 1 : -1);
         
         dist.set(0, 256);
@@ -691,7 +691,7 @@ BOOST_AUTO_TEST_CASE(set_random_uniform_nometa)
 {
     using namespace dyndist;
     
-    vector_distribution<uint64_t> dist;
+    discrete_distribution_testimpl<uint64_t> dist;
     dist.force_meta(-1);
     
     const std::size_t N = 1000;
@@ -714,7 +714,7 @@ BOOST_AUTO_TEST_CASE(set_random_uniform_meta)
 {
     using namespace dyndist;
     
-    vector_distribution<uint64_t> dist;
+    discrete_distribution_testimpl<uint64_t> dist;
     dist.force_meta(1);
     
     const std::size_t N = 1000;
@@ -737,7 +737,7 @@ BOOST_AUTO_TEST_CASE(set_random_loguniform_nometa)
 {
     using namespace dyndist;
     
-    vector_distribution<uint64_t> dist;
+    discrete_distribution_testimpl<uint64_t> dist;
     dist.force_meta(-1);
     
     const std::size_t N = 1000;
@@ -760,7 +760,7 @@ BOOST_AUTO_TEST_CASE(set_random_loguniform_meta)
 {
     using namespace dyndist;
     
-    vector_distribution<uint64_t> dist;
+    discrete_distribution_testimpl<uint64_t> dist;
     dist.force_meta(1);
     
     const std::size_t N = 1000;
