@@ -192,7 +192,7 @@ private:
 
     private:
         friend class vector_distribution;
-        friend class iterator;
+        friend struct iterator;
 
         DYNDIST_INLINE
         event_proxy(vector_distribution& idx_dist, std::size_t event_idx)
@@ -219,7 +219,7 @@ public:
         { return &((*m_vector_distribution)[this->m_event_i]); }
 
     private:
-        friend class const_iterator;
+        friend struct const_iterator;
         friend class vector_distribution;
 
         DYNDIST_INLINE
