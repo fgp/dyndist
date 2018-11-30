@@ -157,29 +157,36 @@ private:
     struct event_proxy
     {
         /** attempting to take the address of an event_proxy returns an iterator pointing to the event */
+        DYNDIST_INLINE_FLATTEN
         iterator operator& () const
         { return iterator(m_vector_distribution, m_event_idx); }
 
+        DYNDIST_INLINE_FLATTEN
         operator weight_t () const
         { return m_vector_distribution.at(m_event_idx); }
 
         template<typename T>
+        DYNDIST_INLINE
         event_proxy& operator=(const T& w)
         { m_vector_distribution.replace(m_event_idx, w); return *this; }
 
         template<typename T>
+        DYNDIST_INLINE
         const T& operator+=(const T& w)
         { m_vector_distribution.replace(m_event_idx, m_vector_distribution.at(m_event_idx) + w); return w; }
 
         template<typename T>
+        DYNDIST_INLINE
         const T& operator-=(const T& w)
         { m_vector_distribution.replace(m_event_idx, m_vector_distribution.at(m_event_idx) - w); return w; }
 
         template<typename T>
+        DYNDIST_INLINE
         const T& operator*=(const T& w)
         { m_vector_distribution.replace(m_event_idx, m_vector_distribution.at(m_event_idx) * w); return w; }
 
         template<typename T>
+        DYNDIST_INLINE
         const T& operator/=(const T& w)
         { m_vector_distribution.replace(m_event_idx, m_vector_distribution.at(m_event_idx) / w); return w; }
 
@@ -187,6 +194,7 @@ private:
         friend class vector_distribution;
         friend class iterator;
 
+        DYNDIST_INLINE
         event_proxy(vector_distribution& idx_dist, std::size_t event_idx)
                 :m_vector_distribution(idx_dist)
                 ,m_event_idx(event_idx)
@@ -202,9 +210,11 @@ public:
     /** Mutable iterator for vector_distribution */
     struct iterator : vector_distribution_details::iterator_base<iterator, std::size_t>
     {
+        DYNDIST_INLINE_FLATTEN
         event_proxy operator*() const
         { return event_proxy(*m_vector_distribution, this->m_event_i); }
 
+        DYNDIST_INLINE_FLATTEN
         const weight_t* operator->() const
         { return &((*m_vector_distribution)[this->m_event_i]); }
 
@@ -212,6 +222,7 @@ public:
         friend class const_iterator;
         friend class vector_distribution;
 
+        DYNDIST_INLINE
         iterator(vector_distribution& distribution, std::size_t event_idx)
                 :vector_distribution_details::iterator_base<iterator, std::size_t>(event_idx)
                 ,m_vector_distribution(&distribution)
@@ -224,20 +235,24 @@ public:
     struct const_iterator : vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>
     {
         /** Creates a const_iterator from a non-const iterator */
+        DYNDIST_INLINE_FLATTEN
         const_iterator(const iterator& it)
             :vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>(
                     it.m_vector_distribution->m_events.begin() + it.m_event_i)
         {}
 
+        DYNDIST_INLINE_FLATTEN
         const weight_t& operator*() const
         { return (*this->m_event_i)->weight; }
 
+        DYNDIST_INLINE_FLATTEN
         const weight_t* operator->() const
         { return &(*this->m_event_i)->weight; }
 
     private:
         friend class vector_distribution;
 
+        DYNDIST_INLINE_FLATTEN
         explicit const_iterator(typename events_vector_type::const_iterator event_i)
                 :vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>(event_i)
         {}
@@ -253,14 +268,17 @@ public:
     vector_distribution(std::size_t count, std::size_t weight);
 
     /** Returns the number of events in the distribution */
+    DYNDIST_INLINE
     std::size_t size() const
     { return m_events.size(); }
 
     /** Returns the total weight of the events in the distribution */
+    DYNDIST_INLINE
     weight_t weight() const
     { return m_distribution.weight(); }
 
     /** Returns the weight of the i-th event */
+    DYNDIST_INLINE
     const weight_t& at(std::size_t i) const
     { return m_events.at(i)->weight; }
 
@@ -269,37 +287,43 @@ public:
     { return m_distribution.set(m_events.at(i), w); }
 
     /** Returns the weight of the i-th event */
+    DYNDIST_INLINE
     const weight_t& operator[](std::size_t i) const
     { return at(i); }
 
     /** Returns a mutable proxy of the i-th event that allows a new weight to be assigned with = */
+    DYNDIST_INLINE
     event_proxy operator[](std::size_t i)
     { return event_proxy(*this, i); }
 
     /** Adds a event with weight w, returns the event's index */
-    std::size_t push_back(const weight_t& w)
-    { const std::size_t i = m_events.size(); m_events.push_back(m_distribution.insert(event_type(w, i))); return i;}
+    std::size_t push_back(const weight_t& w);
 
     /** Draws a random event */
     template<typename Engine>
-    std::size_t operator()(Engine& engine)
-    { return m_distribution(engine)->data; }
+    std::size_t operator()(Engine& engine);
 
+    DYNDIST_INLINE
     iterator begin()
     { return iterator(*this, 0); }
 
+    DYNDIST_INLINE
     const_iterator begin() const
     { return cbegin(); }
 
+    DYNDIST_INLINE
     const_iterator cbegin()
     { return const_iterator(m_events.cbegin()); }
 
+    DYNDIST_INLINE
     iterator end()
     { return iterator(*this, m_events.size()); }
 
+    DYNDIST_INLINE
     const_iterator end() const
     { return cend(); }
 
+    DYNDIST_INLINE
     const_iterator cend()
     { return const_iterator(m_events.cend()); }
 
@@ -316,6 +340,20 @@ vector_distribution<W>::vector_distribution(std::size_t count, std::size_t weigh
         push_back(weight);
 }
 
+/** Adds a event with weight w, returns the event's index */
+template<typename W>
+std::size_t
+DYNDIST_FLATTEN
+vector_distribution<W>::push_back(const weight_t& w)
+{ const std::size_t i = m_events.size(); m_events.push_back(m_distribution.insert(event_type(w, i))); return i;}
+
+/** Draws a random event */
+template<typename W>
+template<typename Engine>
+DYNDIST_FLATTEN
+std::size_t
+vector_distribution<W>::operator()(Engine& engine)
+{ return m_distribution(engine)->data; }
 
 DYNDIST_NAMESPACE_END
 
