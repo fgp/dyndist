@@ -313,7 +313,8 @@ public:
 
     DYNDIST_INLINE
     const_iterator cbegin()
-    { return const_iterator(m_events.cbegin()); }
+
+    { return const_iterator(m_events.begin()); }
 
     DYNDIST_INLINE
     iterator end()
@@ -325,7 +326,7 @@ public:
 
     DYNDIST_INLINE
     const_iterator cend()
-    { return const_iterator(m_events.cend()); }
+    { return const_iterator(m_events.end()); }
 
 private:
     events_vector_type m_events;
