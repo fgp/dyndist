@@ -163,13 +163,13 @@ function(SETUP_TARGET_FOR_COVERAGE_LCOV)
         # add baseline counters
         COMMAND ${LCOV_PATH} ${Coverage_LCOV_ARGS} --gcov-tool ${GCOV_PATH} -a ${Coverage_NAME}.base -a ${Coverage_NAME}.info --output-file ${Coverage_NAME}.total
         COMMAND ${LCOV_PATH} ${Coverage_LCOV_ARGS} --gcov-tool ${GCOV_PATH} --remove ${Coverage_NAME}.total ${COVERAGE_LCOV_EXCLUDES} --output-file ${Coverage_NAME}.info.cleaned
-	COMMAND ${CMAKE_COMMAND} -E copy ${Coverage_NAME}.info.cleaned ${Coverage_NAME}.info
+	    COMMAND ${CMAKE_COMMAND} -E copy ${Coverage_NAME}.info.cleaned ${Coverage_NAME}.info
         COMMAND ${GENHTML_PATH} ${Coverage_GENHTML_ARGS} -o ${Coverage_NAME} ${Coverage_NAME}.info
         COMMAND ${CMAKE_COMMAND} -E remove ${Coverage_NAME}.base ${Coverage_NAME}.total ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
 
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS ${Coverage_DEPENDENCIES}
-        COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
+        COMMENT "Running tests and generating coverage report"
     )
 
     # Show where to find the lcov info report

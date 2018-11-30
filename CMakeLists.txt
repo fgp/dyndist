@@ -22,11 +22,11 @@ if (COVERAGE)
 	APPEND_COVERAGE_COMPILER_FLAGS()
 	set(COVERAGE_LCOV_EXCLUDES 'tests/*' '/usr/*')
 
-        SETUP_TARGET_FOR_COVERAGE_LCOV(
-                NAME coverage
-                EXECUTABLE dyndist_tests
-                DEPENDENCIES dyndist_tests
-        )
+	SETUP_TARGET_FOR_COVERAGE_LCOV(
+			NAME coverage
+			EXECUTABLE dyndist_tests
+			DEPENDENCIES dyndist_tests
+	)
 endif(COVERAGE)
 
 # Tests
