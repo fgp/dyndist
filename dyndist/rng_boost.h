@@ -25,7 +25,7 @@
 
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/type_traits/is_float.hpp>
-#include <boost/core/enable_if.hpp>
+#include <boost/utility/enable_if.hpp>
 DYNDIST_NOWARN_PUSH
 DYNDIST_NOWARN_SIGNS
 #include <boost/random/uniform_real_distribution.hpp>
