@@ -76,6 +76,48 @@ DYNDIST_NOWARN_POP
 
 BOOST_AUTO_TEST_SUITE(test_vector_distribution)
 
+BOOST_AUTO_TEST_CASE(iterator_test)
+{
+    using namespace dyndist;
+
+    typedef vector_distribution <uint64_t> dist_t;
+    dist_t d;
+
+    BOOST_REQUIRE(d.begin() == d.end());
+    BOOST_REQUIRE(d.cbegin() == d.cend());
+    //BOOST_REQUIRE(d.begin() == d.cend()); // currently unsupported
+    BOOST_REQUIRE(d.cbegin() == d.end());
+
+    const std::size_t N = 1000;
+    for(std::size_t n = 0; n < N; ++n) {
+        d.push_back(n);
+        BOOST_REQUIRE_EQUAL(d.end() - d.begin(), n+1);
+        BOOST_REQUIRE_EQUAL(d.cend() - d.cbegin(), n+1);
+        //BOOST_REQUIRE_EQUAL(d.end() - d.cbegin(), n+1); // currently unsupported
+        BOOST_REQUIRE_EQUAL(d.cend() - d.begin(), n+1);
+
+        BOOST_REQUIRE(++(d.begin() + n) == d.end());
+        BOOST_REQUIRE(++(d.cbegin() + n) == d.cend());
+
+        BOOST_REQUIRE(--(d.end() - n) == d.begin());
+        BOOST_REQUIRE(--(d.cend() - n) == d.cbegin());
+
+        dist_t::iterator i1 = d.begin(); i1 += n; i1++; BOOST_REQUIRE(i1 == d.end());
+        dist_t::const_iterator i2 = d.cbegin(); i2 += n; i2++; BOOST_REQUIRE(i2 == d.cend());
+
+        BOOST_REQUIRE(d.begin() < d.end());
+        BOOST_REQUIRE(d.begin() <= d.end());
+        BOOST_REQUIRE(d.end() >= d.begin());
+        BOOST_REQUIRE(d.end() > d.begin());
+        BOOST_REQUIRE(d.cbegin() < d.cend());
+        BOOST_REQUIRE(d.cbegin() <= d.cend());
+        BOOST_REQUIRE(d.cend() >= d.cbegin());
+        BOOST_REQUIRE(d.cend() > d.cbegin());
+
+        BOOST_REQUIRE(&d[n] + 1 == d.end());
+    }
+}
+
 BOOST_AUTO_TEST_CASE(chisquared_test)
 {
     using namespace dyndist;
@@ -106,12 +148,12 @@ BOOST_AUTO_TEST_CASE(chisquared_test)
         /* Check that the empirical and expected distributions are similar */
         double x = 0;
         int df = -1;
-        for (dist_t::const_iterator p_i = p.cbegin(); p_i != p.cend(); ++p_i) {
+        for (dist_t::const_iterator p_i = p.cbegin(), p_end=p.cend(); p_i != p_end; ++p_i) {
             if (*p_i == 0)
                 continue;
 
             const double m = (double) *p_i * S / p.weight();
-            x += std::pow((double)obs[p_i - p.begin()] - m, 2) / m;
+            x += std::pow((double)obs[p_i - p.cbegin()] - m, 2) / m;
             ++df;
         }
 
