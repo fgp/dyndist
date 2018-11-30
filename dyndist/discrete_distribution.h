@@ -919,7 +919,7 @@ namespace discrete_distribution_details
         { (d > 0) ? rev((size_t)d) : fwd((size_t)-d); return *this; }
 
         DYNDIST_INLINE
-        iterator operator++(int) const
+        iterator operator++(int)
         { iterator i = *this; ++(*this); return i; }
 
         DYNDIST_INLINE
@@ -927,7 +927,7 @@ namespace discrete_distribution_details
         { iterator i = *this; i += d; return i; }
 
         DYNDIST_INLINE
-        iterator operator--(int) const
+        iterator operator--(int)
         { iterator i = *this; --(*this); return i; }
 
         DYNDIST_INLINE
