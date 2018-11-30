@@ -20,7 +20,8 @@ target_link_libraries(dyndist_tests ${Boost_LIBRARIES})
 if (COVERAGE)
 	include(CodeCoverage)
 	APPEND_COVERAGE_COMPILER_FLAGS()
-	set(COVERAGE_LCOV_EXCLUDES 'tests/*' '/usr/*')
+	set(COVERAGE_LCOV_EXCLUDES 'tests/*' '/usr/*' '${Boost_INCLUDE_DIRS}/boost/*')
+	message("Excluding " ${COVERAGE_LCOV_EXCLUDES})
 
 	SETUP_TARGET_FOR_COVERAGE_LCOV(
 			NAME coverage
