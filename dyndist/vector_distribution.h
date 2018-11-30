@@ -65,13 +65,13 @@ namespace vector_distribution_details
         iterator_type& operator-=(std::ptrdiff_t d)
         { m_event_i -= d; return *self(); }
 
-        iterator_type operator++(int) const
+        iterator_type operator++(int)
         { iterator_type i = *self(); ++(*self()); return i; }
 
         iterator_type operator+(std::ptrdiff_t d) const
         { iterator_type i = *self(); i += d; return i; }
 
-        iterator_type operator--(int) const
+        iterator_type operator--(int)
         { iterator_type i = *self(); --(*self()); return i; }
 
         iterator_type operator-(std::ptrdiff_t d) const
@@ -148,16 +148,17 @@ public:
     typedef discrete_distribution<std::size_t, weight_t, std::size_t, species_moved>
             distribution_type;
 
+    struct iterator;
+
 private:
     typedef typename distribution_type::value_type event_type;
 
     /** Proxy returned by operator= to allow new weights to be assigned */
     struct event_proxy
     {
-        event_proxy(vector_distribution& idx_dist, std::size_t event_idx)
-                :m_vector_distribution(idx_dist)
-                ,m_event_idx(event_idx)
-        {}
+        /** attempting to take the address of an event_proxy returns an iterator pointing to the event */
+        iterator operator& () const
+        { return iterator(m_vector_distribution, m_event_idx); }
 
         operator weight_t () const
         { return m_vector_distribution.at(m_event_idx); }
@@ -183,6 +184,14 @@ private:
         { m_vector_distribution.replace(m_event_idx, m_vector_distribution.at(m_event_idx) / w); return w; }
 
     private:
+        friend class vector_distribution;
+        friend class iterator;
+
+        event_proxy(vector_distribution& idx_dist, std::size_t event_idx)
+                :m_vector_distribution(idx_dist)
+                ,m_event_idx(event_idx)
+        {}
+
         vector_distribution& m_vector_distribution;
         const std::size_t m_event_idx;
     };
@@ -193,47 +202,45 @@ public:
     /** Mutable iterator for vector_distribution */
     struct iterator : vector_distribution_details::iterator_base<iterator, std::size_t>
     {
-        iterator(vector_distribution& distribution, std::size_t event_idx)
-            :vector_distribution_details::iterator_base<iterator, std::size_t>(event_idx)
-            ,m_distribution(&distribution)
-        {}
-
-        // TODO: Doesn't work correctly it seems
-        operator const weight_t* () const
-        { return &m_distribution->at(this->m_event_i); }
-
         event_proxy operator*() const
-        { return event_proxy(*m_distribution, this->m_event_i); }
+        { return event_proxy(*m_vector_distribution, this->m_event_i); }
 
         const weight_t* operator->() const
-        { return &m_distribution->at(this->m_event_i); }
+        { return &((*m_vector_distribution)[this->m_event_i]); }
 
     private:
         friend class const_iterator;
-        vector_distribution* m_distribution;
+        friend class vector_distribution;
+
+        iterator(vector_distribution& distribution, std::size_t event_idx)
+                :vector_distribution_details::iterator_base<iterator, std::size_t>(event_idx)
+                ,m_vector_distribution(&distribution)
+        {}
+
+        vector_distribution* m_vector_distribution;
     };
 
     /** Const iterator for vector_distribution */
     struct const_iterator : vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>
     {
-        explicit const_iterator(typename events_vector_type::const_iterator event_i)
-            :vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>(event_i)
-        {}
-
-        // TODO: Should be implicit, but this hides the conversion bug in the non-const iterator
-        explicit const_iterator(const iterator& it)
+        /** Creates a const_iterator from a non-const iterator */
+        const_iterator(const iterator& it)
             :vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>(
-                    it.m_distribution->m_events.begin() + it.m_event_i)
+                    it.m_vector_distribution->m_events.begin() + it.m_event_i)
         {}
-
-        operator const weight_t* () const
-        { return &(*this->m_event_i)->weight; }
 
         const weight_t& operator*() const
         { return (*this->m_event_i)->weight; }
 
         const weight_t* operator->() const
         { return &(*this->m_event_i)->weight; }
+
+    private:
+        friend class vector_distribution;
+
+        explicit const_iterator(typename events_vector_type::const_iterator event_i)
+                :vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>(event_i)
+        {}
     };
 
 public:
@@ -245,10 +252,11 @@ public:
     /** Constructs a distribution containing \param count elements of weight \param weight */
     vector_distribution(std::size_t count, std::size_t weight);
 
-    /** Returns the number of events in the urn */
+    /** Returns the number of events in the distribution */
     std::size_t size() const
     { return m_events.size(); }
 
+    /** Returns the total weight of the events in the distribution */
     weight_t weight() const
     { return m_distribution.weight(); }
 
