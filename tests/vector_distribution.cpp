@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(chisquared_test)
     const double alpha = 1e-6;
     const std::size_t M = 10;
     const std::size_t N = 100;
-    const std::size_t S = 1000000;
+    const std::size_t S = 100000;
     mt19937 rng;
     uniform_int_distribution<uint64_t> dist_key(0,N-1);
     uniform_int_distribution<uint64_t> dist_weight(1, 1000);
