@@ -1,0 +1,36 @@
+language: cpp
+dist: xenial
+
+compiler:
+  - clang
+  - gcc
+env:
+  - CMAKE_BUILD_TYPE=Debug   CMAKE_CXX_STANDARD=98
+  - CMAKE_BUILD_TYPE=Release CMAKE_CXX_STANDARD=98
+  - CMAKE_BUILD_TYPE=Debug   CMAKE_CXX_STANDARD=98 COVERAGE=1
+  - CMAKE_BUILD_TYPE=Debug   CMAKE_CXX_STANDARD=11
+  - CMAKE_BUILD_TYPE=Release CMAKE_CXX_STANDARD=11
+  - CMAKE_BUILD_TYPE=Debug   CMAKE_CXX_STANDARD=11 COVERAGE=1
+
+matrix:
+  exclude:
+    - compiler: clang
+      env: CMAKE_BUILD_TYPE=Debug   CMAKE_CXX_STANDARD=98 COVERAGE=1
+    - compiler: clang
+      env: CMAKE_BUILD_TYPE=Debug   CMAKE_CXX_STANDARD=11 COVERAGE=1
+
+addons:
+  apt:
+    packages: libboost-all-dev lcov 
+
+install:
+  - 'gem install coveralls-lcov'
+
+script:
+  - 'cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} CMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCOVERAGE=${COVERAGE} .'
+  - '[[ ! -z "${COVERAGE}" ]] || make run-tests'
+  - '[[   -z "${COVERAGE}" ]] || make coverage'
+
+after_success:
+  - '[[ -z "${COVERAGE}" ]] || cd ${TRAVIS_BUILD_DIR}'
+  - '[[ -z "${COVERAGE}" ]] || coveralls-lcov coverage.info'
