@@ -885,11 +885,12 @@ namespace discrete_distribution_details
             :m_distribution(NULL)
             ,m_level_i(), m_level(NULL), m_event_i()
         {}
-        
+
+        // TODO: This doesn't work for const iterators
         DYNDIST_INLINE_FLATTEN
         operator pointer () const
         { return pointer(*m_level, *m_event_i); }
-        
+
         DYNDIST_INLINE_FLATTEN
         value_type& operator*() const
         { return *m_event_i; }

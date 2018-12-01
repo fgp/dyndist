@@ -74,6 +74,11 @@ DYNDIST_NOWARN_POP
 
 #endif // __cplusplus <> 201103L
 
+/* Instantiate templates to get correct code coverage results */
+DYNDIST_NAMESPACE_BEGIN
+template class vector_distribution<std::size_t>;
+DYNDIST_NAMESPACE_END
+
 BOOST_AUTO_TEST_SUITE(test_vector_distribution)
 
 BOOST_AUTO_TEST_CASE(iterator_test)

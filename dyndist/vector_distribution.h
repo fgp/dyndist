@@ -214,10 +214,6 @@ public:
         event_proxy operator*() const
         { return event_proxy(*m_vector_distribution, this->m_event_i); }
 
-        DYNDIST_INLINE_FLATTEN
-        const weight_t* operator->() const
-        { return &((*m_vector_distribution)[this->m_event_i]); }
-
     private:
         friend struct const_iterator;
         friend class vector_distribution;
@@ -244,10 +240,6 @@ public:
         DYNDIST_INLINE_FLATTEN
         const weight_t& operator*() const
         { return (*this->m_event_i)->weight; }
-
-        DYNDIST_INLINE_FLATTEN
-        const weight_t* operator->() const
-        { return &(*this->m_event_i)->weight; }
 
     private:
         friend class vector_distribution;
@@ -312,8 +304,7 @@ public:
     { return cbegin(); }
 
     DYNDIST_INLINE
-    const_iterator cbegin()
-
+    const_iterator cbegin() const
     { return const_iterator(m_events.begin()); }
 
     DYNDIST_INLINE
@@ -325,7 +316,7 @@ public:
     { return cend(); }
 
     DYNDIST_INLINE
-    const_iterator cend()
+    const_iterator cend() const
     { return const_iterator(m_events.end()); }
 
 private:
