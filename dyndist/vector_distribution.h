@@ -49,6 +49,9 @@ namespace vector_distribution_details
         { return static_cast<const iterator_type*>(this); }
 
     public:
+        iterator_base()
+        {}
+
         explicit iterator_base(const event_iterator_type event_i)
             :m_event_i(event_i)
         {}
@@ -210,6 +213,11 @@ public:
     /** Mutable iterator for vector_distribution */
     struct iterator : vector_distribution_details::iterator_base<iterator, std::size_t>
     {
+        /** Creates an empty iterator. Dereferencing such an instance causes undefined behaviour  */
+        iterator()
+            :m_vector_distribution(NULL)
+        {}
+
         DYNDIST_INLINE_FLATTEN
         event_proxy operator*() const
         { return event_proxy(*m_vector_distribution, this->m_event_i); }
@@ -230,6 +238,10 @@ public:
     /** Const iterator for vector_distribution */
     struct const_iterator : vector_distribution_details::iterator_base<const_iterator, typename events_vector_type::const_iterator>
     {
+        /** Creates an empty const_iterator. Dereferencing such an instance causes undefined behaviour  */
+        const_iterator()
+        {}
+
         /** Creates a const_iterator from a non-const iterator */
         DYNDIST_INLINE_FLATTEN
         const_iterator(const iterator& it)
