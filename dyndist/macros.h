@@ -45,10 +45,14 @@
 
 #if __has_attribute(always_inline)
 #   define DYNDIST_ATTR_INLINE __attribute__ ((always_inline))
-#   define DYNDIST_INLINE inline DYNDIST_ATTR_INLINE
+#   ifndef DYNDIST_INLINE
+#       define DYNDIST_INLINE inline DYNDIST_ATTR_INLINE
+#   endif
 #else
 #   define DYNDIST_ATTR_INLINE
-#   define DYNDIST_INLINE inline
+#   ifndef DYNDIST_INLINE
+#       define DYNDIST_INLINE inline
+#   endif
 #endif
 
 #if __has_attribute(flatten)
@@ -63,9 +67,15 @@
 #   define DYNDIST_ATTR_NOINLINE
 #endif
 
-#define DYNDIST_FLATTEN DYNDIST_ATTR_FLATTEN
-#define DYNDIST_INLINE_FLATTEN DYNDIST_INLINE DYNDIST_ATTR_FLATTEN
-#define DYNDIST_NOINLINE DYNDIST_ATTR_NOINLINE
+#ifndef DYNDIST_FLATTEN
+#   define DYNDIST_FLATTEN DYNDIST_ATTR_FLATTEN
+#endif
+#ifndef DYNDIST_INLINE_FLATTEN
+#   define DYNDIST_INLINE_FLATTEN DYNDIST_INLINE DYNDIST_FLATTEN
+#endif
+#ifndef DYNDIST_NOINLINE
+#   define DYNDIST_NOINLINE DYNDIST_ATTR_NOINLINE
+#endif
 
 #if defined(__GNUC__)
 #   define DYNDIST_NOWARN_PUSH \

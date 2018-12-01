@@ -18,10 +18,17 @@ target_link_libraries(dyndist_tests ${Boost_LIBRARIES})
 
 # GCov
 if (COVERAGE)
+	# Define INLINE, FLATTEN and INLINE_FLATTEN away (i.e. define to be empty)
+	add_definitions(-DDYNDIST_INLINE= -DDYNDIST_FLATTEN= -DDYNDIST_INLINE_FLATTEN=)
+
 	include(CodeCoverage)
 	APPEND_COVERAGE_COMPILER_FLAGS()
-	set(COVERAGE_LCOV_EXCLUDES 'tests/*' '/usr/*' '${Boost_INCLUDE_DIRS}/boost/*')
-	message("Excluding " ${COVERAGE_LCOV_EXCLUDES})
+	set(COVERAGE_LCOV_EXCLUDES
+			'${CMAKE_SOURCE_DIR}/tests/*'
+			'${Boost_INCLUDE_DIRS}/boost/*'
+			'/usr/*'
+			'/Applications/Xcode.app/*')
+	message("-- Coverage analysis will exclude " ${COVERAGE_LCOV_EXCLUDES})
 
 	SETUP_TARGET_FOR_COVERAGE_LCOV(
 			NAME coverage

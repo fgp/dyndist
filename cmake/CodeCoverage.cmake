@@ -87,8 +87,13 @@ elseif(NOT CMAKE_COMPILER_IS_GNUCXX)
     message(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
 endif()
 
-set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
-    CACHE INTERNAL "")
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+    set(COVERAGE_COMPILER_FLAGS "-g -O0 -fno-inline -fprofile-arcs -ftest-coverage"
+        CACHE INTERNAL "")
+else()
+    set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fno-inline -fprofile-arcs -ftest-coverage"
+        CACHE INTERNAL "")
+endif()
 
 set(CMAKE_CXX_FLAGS_COVERAGE
     ${COVERAGE_COMPILER_FLAGS}
@@ -167,6 +172,7 @@ function(SETUP_TARGET_FOR_COVERAGE_LCOV)
         COMMAND ${GENHTML_PATH} ${Coverage_GENHTML_ARGS} -o ${Coverage_NAME} ${Coverage_NAME}.info
         COMMAND ${CMAKE_COMMAND} -E remove ${Coverage_NAME}.base ${Coverage_NAME}.total ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
 
+        # Target settings
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS ${Coverage_DEPENDENCIES}
         COMMENT "Running tests and generating coverage report"
