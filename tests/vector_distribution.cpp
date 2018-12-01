@@ -127,7 +127,8 @@ BOOST_AUTO_TEST_CASE(chisquared_test)
 {
     using namespace dyndist;
 
-    const double alpha = 1e-6;
+    const double alpha = 1e-3;
+    const std::size_t R = 5;
     const std::size_t M = 10;
     const std::size_t N = 100;
     const std::size_t S = 100000;
@@ -135,37 +136,43 @@ BOOST_AUTO_TEST_CASE(chisquared_test)
     uniform_int_distribution<uint64_t> dist_key(0,N-1);
     uniform_int_distribution<uint64_t> dist_weight(1, 1000);
 
-    typedef vector_distribution<uint64_t> dist_t;
-    dist_t p(N, 0);
-    std::vector<uint64_t> obs;
+    for(std::size_t r=0; r < R; ++r) {
+        typedef vector_distribution<uint64_t> dist_t;
+        dist_t p(N, 0);
+        std::vector<uint64_t> obs;
 
-    for(std::size_t m=0; m < M; ++m) {
-        /* Re-assign weights */
-        for (dist_t::iterator p_i = p.begin(); p_i != p.end(); ++p_i) {
-            *p_i = dist_weight(rng);
+        double pval_max = 0.0;
+        for(std::size_t m=0; m < M; ++m) {
+            /* Re-assign weights */
+            for (dist_t::iterator p_i = p.begin(); p_i != p.end(); ++p_i) {
+                *p_i = dist_weight(rng);
+            }
+
+            /* Samples B times */
+            obs = std::vector<uint64_t>(N, 0);
+            for (std::size_t s = 0; s < S; ++s)
+                obs[p(rng)] += 1;
+
+            /* Check that the empirical and expected distributions are similar */
+            double x = 0;
+            int df = -1;
+            for (dist_t::const_iterator p_i = p.cbegin(), p_end=p.cend(); p_i != p_end; ++p_i) {
+                if (*p_i == 0)
+                    continue;
+
+                const double m = (double) *p_i * S / p.weight();
+                x += std::pow((double)obs[p_i - p.cbegin()] - m, 2) / m;
+                ++df;
+            }
+
+            /* Check that the p-value is reasonable */
+            boost::math::chi_squared chisq_dist(df);
+            const double pval = cdf(complement(chisq_dist, x));
+            pval_max = std::max(pval, pval_max);
         }
 
-        /* Samples B times */
-        obs = std::vector<uint64_t>(N, 0);
-        for (std::size_t s = 0; s < S; ++s)
-            obs[p(rng)] += 1;
-
-        /* Check that the empirical and expected distributions are similar */
-        double x = 0;
-        int df = -1;
-        for (dist_t::const_iterator p_i = p.cbegin(), p_end=p.cend(); p_i != p_end; ++p_i) {
-            if (*p_i == 0)
-                continue;
-
-            const double m = (double) *p_i * S / p.weight();
-            x += std::pow((double)obs[p_i - p.cbegin()] - m, 2) / m;
-            ++df;
-        }
-
-        /* Check that the p-value is reasonable */
-        boost::math::chi_squared chisq_dist(df);
-        const double critical = quantile(complement(chisq_dist, alpha));
-        BOOST_REQUIRE_LT(x, critical);
+        /* We should have observed at least one large p-value */
+        BOOST_REQUIRE_GT(pval_max, 0.5);
     }
 }
 
