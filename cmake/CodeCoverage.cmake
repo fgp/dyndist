@@ -87,13 +87,8 @@ elseif(NOT CMAKE_COMPILER_IS_GNUCXX)
     message(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
-    set(COVERAGE_COMPILER_FLAGS "-g -O0 -fno-inline -fprofile-arcs -ftest-coverage"
-        CACHE INTERNAL "")
-else()
-    set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fno-inline -fprofile-arcs -ftest-coverage"
-        CACHE INTERNAL "")
-endif()
+set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fno-inline"
+    CACHE INTERNAL "")
 
 set(CMAKE_CXX_FLAGS_COVERAGE
     ${COVERAGE_COMPILER_FLAGS}
@@ -121,9 +116,11 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(WARNING "Code coverage results with an optimised (non-Debug) build may be misleading")
 endif() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
+
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     link_libraries(gcov)
-else()
+elseif(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+    # Seems that Apple's clang doesn't need this, and it causes a warning
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
