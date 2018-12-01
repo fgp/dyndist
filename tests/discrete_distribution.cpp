@@ -379,11 +379,6 @@ discrete_distribution_testimpl<W>::verify_consistency()
 
 /* Instantiate templates to get correct code coverage results */
 DYNDIST_NAMESPACE_BEGIN
-namespace discrete_distribution_details {
-    template class iterator< iterator_types< ::discrete_distribution_testimpl<std::size_t>::super_type > >;
-    // TODO: iterator's operator pointer () const can't be instantiated for const_iterator
-    //template class iterator< const_iterator_types< ::discrete_distribution_testimpl<std::size_t>::super_type > >;
-}
 template class discrete_distribution_value<std::size_t, std::size_t>;
 template class discrete_distribution_pointer<std::size_t, std::size_t, std::size_t>;
 template class discrete_distribution_value< ::flavoured_weight<unsigned int>, std::size_t>;

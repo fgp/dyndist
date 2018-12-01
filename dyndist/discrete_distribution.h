@@ -668,11 +668,6 @@ namespace discrete_distribution_details
         value_type m_value;
     };
     
-    
-    template<typename DistributionType>
-    struct iterator;
-
-    
     /**
      * \struct level_data
      *
@@ -811,7 +806,7 @@ namespace discrete_distribution_details
     
     
     /**
-     * \struct iterator
+     * \struct iterator_base
      *
      * A random access iterator which allows iteration through all the events
      * stored within a discrete_distribution.
@@ -836,8 +831,8 @@ namespace discrete_distribution_details
      * the first case, m_event_i points to the first element of the first
      * non-empty level.
      */
-    template<typename Types>
-    struct iterator
+    template<typename IteratorType, typename Types>
+    struct iterator_base
     {
         typedef typename Types::distribution_type distribution_type;
 
@@ -847,7 +842,9 @@ namespace discrete_distribution_details
         
         typedef typename distribution_type::size_t size_t;
 
-    private:
+        typedef IteratorType iterator_type;
+
+    protected:
         DYNDIST_DISCRETE_DISTRIBUTION_FRIEND;
 
         typedef typename Types::levels_iterator levels_iterator;
@@ -855,13 +852,14 @@ namespace discrete_distribution_details
         typedef typename Types::levels_value_type levels_value_type;
         
         static
-        iterator begin(distribution_type& distribution);
+        iterator_type begin(distribution_type& distribution);
 
         static
-        iterator end(distribution_type& distribution);
+        iterator_type end(distribution_type& distribution);
 
+    protected:
         DYNDIST_INLINE_FLATTEN
-        iterator
+        iterator_base
         (const levels_iterator& level_i, levels_value_type& level,
          const events_iterator& event_i, distribution_type& distribution)
             :m_distribution(&distribution)
@@ -879,17 +877,13 @@ namespace discrete_distribution_details
             DYNDIST_ASSERT(m_event_i <= m_level->second.events.end());
         }
 
+
     public:
         DYNDIST_INLINE_FLATTEN
-        iterator()
-            :m_distribution(NULL)
-            ,m_level_i(), m_level(NULL), m_event_i()
+        iterator_base()
+                :m_distribution(NULL)
+                ,m_level_i(), m_level(NULL), m_event_i()
         {}
-
-        // TODO: This doesn't work for const iterators
-        DYNDIST_INLINE_FLATTEN
-        operator pointer () const
-        { return pointer(*m_level, *m_event_i); }
 
         DYNDIST_INLINE_FLATTEN
         value_type& operator*() const
@@ -904,45 +898,45 @@ namespace discrete_distribution_details
         { return *(*this + offset); }
         
         DYNDIST_INLINE
-        iterator& operator++()
-        { ++m_event_i; adjust_fwd(); return *this; }
+        iterator_type& operator++()
+        { ++m_event_i; adjust_fwd(); return *self(); }
 
         DYNDIST_INLINE
-        iterator& operator+=(std::ptrdiff_t d)
-        { (d > 0) ? fwd((size_t)d) : rev((size_t)-d); return *this; }
+        iterator_type& operator+=(std::ptrdiff_t d)
+        { (d > 0) ? fwd((size_t)d) : rev((size_t)-d); return *self(); }
 
         DYNDIST_INLINE
-        iterator& operator--()
-        { adjust_rev(); --m_event_i; return *this; }
+        iterator_type& operator--()
+        { adjust_rev(); --m_event_i; return *self(); }
 
         DYNDIST_INLINE
-        iterator& operator-=(std::ptrdiff_t d)
-        { (d > 0) ? rev((size_t)d) : fwd((size_t)-d); return *this; }
+        iterator_type& operator-=(std::ptrdiff_t d)
+        { (d > 0) ? rev((size_t)d) : fwd((size_t)-d); return *self(); }
 
         DYNDIST_INLINE
-        iterator operator++(int)
-        { iterator i = *this; ++(*this); return i; }
+        iterator_type operator++(int)
+        { iterator_type i = *self(); ++(*this); return i; }
 
         DYNDIST_INLINE
-        iterator operator+(std::ptrdiff_t d) const
-        { iterator i = *this; i += d; return i; }
+        iterator_type operator+(std::ptrdiff_t d) const
+        { iterator_type i = *self(); i += d; return i; }
 
         DYNDIST_INLINE
-        iterator operator--(int)
-        { iterator i = *this; --(*this); return i; }
+        iterator_type operator--(int)
+        { iterator_type i = *self(); --(*this); return i; }
 
         DYNDIST_INLINE
-        iterator operator-(std::ptrdiff_t d) const
-        { iterator i = *this; i -= d; return i; }
+        iterator_type operator-(std::ptrdiff_t d) const
+        { iterator_type i = *self(); i -= d; return i; }
 
         DYNDIST_INLINE
-        std::ptrdiff_t operator-(const iterator& o) const
+        std::ptrdiff_t operator-(const iterator_base& o) const
         { return ((*this < o)
                   ? -(std::ptrdiff_t)dist_fwd(o)
                   :  (std::ptrdiff_t)o.dist_fwd(*this)); }
         
         DYNDIST_INLINE
-        bool operator< (const iterator& o) const
+        bool operator< (const iterator_base& o) const
         { return ((m_level_i < o.m_level_i)
                   ? true
                   : ((m_level_i == o.m_level_i)
@@ -950,7 +944,7 @@ namespace discrete_distribution_details
                      : false)); }
 
         DYNDIST_INLINE
-        bool operator<= (const iterator& o) const
+        bool operator<= (const iterator_base& o) const
         { return ((m_level_i < o.m_level_i)
                   ? true
                   : ((m_level_i == o.m_level_i)
@@ -958,22 +952,22 @@ namespace discrete_distribution_details
                      : false)); }
 
         DYNDIST_INLINE_FLATTEN
-        bool operator==(const iterator& o) const
+        bool operator==(const iterator_base& o) const
         { return (m_level == o.m_level) && (m_event_i == o.m_event_i); }
 
         DYNDIST_INLINE_FLATTEN
-        bool operator!=(const iterator& o) const
+        bool operator!=(const iterator_base& o) const
         { return !(*this == o); }
 
         DYNDIST_INLINE_FLATTEN
-        bool operator>=(const iterator& o) const
+        bool operator>=(const iterator_base& o) const
         { return !(*this < o); }
 
         DYNDIST_INLINE_FLATTEN
-        bool operator> (const iterator& o) const
+        bool operator> (const iterator_base& o) const
         { return !(*this <= o); }
 
-    private:
+    protected:
         /** Move delta entries forward  */
         void fwd(size_t delta);
 
@@ -981,7 +975,7 @@ namespace discrete_distribution_details
         void rev(size_t delta);
 
         /** Measure distance towards b, which must be larger */
-        size_t dist_fwd(const iterator& b) const;
+        size_t dist_fwd(const iterator_base& b) const;
 
         /** Move from end of level to beginning of next level */
         void adjust_fwd();
@@ -994,6 +988,16 @@ namespace discrete_distribution_details
         
         /** Move to end of previous level */
         void level_rev();
+
+        /** The this pointer as a pointer to iterator_type (the derived class) */
+        DYNDIST_INLINE
+        iterator_type* self()
+        { return static_cast<iterator_type*>(this); }
+
+        /** The this pointer as a pointer to iterator_type (the derived class) */
+        DYNDIST_INLINE
+        const iterator_type* self() const
+        { return static_cast<const iterator_type*>(this); }
 
         /** The distribution */
         distribution_type* m_distribution;
@@ -1013,42 +1017,42 @@ namespace discrete_distribution_details
         events_iterator m_event_i;
     };
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_FLATTEN
-    iterator<D>
-    iterator<D>::begin(distribution_type& distribution)
+    typename iterator_base<I,T>::iterator_type
+    iterator_base<I,T>::begin(distribution_type& distribution)
     {
         if (distribution.m_levels_nonzero.empty())
             /* Return iterator positioned at first zero-level event */
-            return iterator(distribution.m_levels_nonzero.end(),
-                            distribution.m_level_zero,
-                            distribution.m_level_zero.second.events.begin(),
-                            distribution);
+            return iterator_type(distribution.m_levels_nonzero.end(),
+                                 distribution.m_level_zero,
+                                 distribution.m_level_zero.second.events.begin(),
+                                 distribution);
         else {
             /* Return iterator positioned at first nonzero-level event */
             const levels_iterator first_i = distribution.m_levels_nonzero.begin();
             levels_value_type& first = **first_i;
-            return iterator(first_i, first, first.second.events.begin(),
-                            distribution);
+            return iterator_type(first_i, first, first.second.events.begin(),
+                                  distribution);
         }
     }
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_FLATTEN
-    iterator<D>
-    iterator<D>::end(distribution_type& distribution)
+    typename iterator_base<I,T>::iterator_type
+    iterator_base<I,T>::end(distribution_type& distribution)
     {
         /* Return iterator positioned at zero-level end */
-        return iterator(distribution.m_levels_nonzero.end(),
-                        distribution.m_level_zero,
-                        distribution.m_level_zero.second.events.end(),
-                        distribution);
+        return iterator_type(distribution.m_levels_nonzero.end(),
+                             distribution.m_level_zero,
+                             distribution.m_level_zero.second.events.end(),
+                             distribution);
     }
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_FLATTEN
     void
-    iterator<D>::fwd(size_t delta)
+    iterator_base<I,T>::fwd(size_t delta)
     {
         /* Skip levels until delta becomes small than the current level's size.
          * The test for delta > 0 is necessary due to the zero level, which
@@ -1077,10 +1081,10 @@ namespace discrete_distribution_details
         m_event_i += (std::ptrdiff_t)delta;
     }
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_FLATTEN
     void
-    iterator<D>::rev(size_t delta)
+    iterator_base<I,T>::rev(size_t delta)
     {
         for(size_t level_remaining = (size_t)(m_event_i - m_level->second.events.begin());
             delta > level_remaining;
@@ -1098,16 +1102,16 @@ namespace discrete_distribution_details
         m_event_i -= (std::ptrdiff_t)delta;
     }
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_FLATTEN
-    typename iterator<D>::size_t
-    iterator<D>::dist_fwd(const iterator& b) const
+    typename iterator_base<I,T>::size_t
+    iterator_base<I,T>::dist_fwd(const iterator_base& b) const
     {
         DYNDIST_ASSERT(*this <= b);
         size_t d=0;
         
         /* Account for elements on the levels up to b's level */
-        iterator a = *this;
+        iterator_base a = *this;
         while(a.m_level_i != b.m_level_i) {
             d += (size_t)(a.m_level->second.events.end() - a.m_event_i);
             a.level_fwd();
@@ -1119,10 +1123,10 @@ namespace discrete_distribution_details
         return d;
     }
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_INLINE
     void
-    iterator<D>::adjust_fwd()
+    iterator_base<I,T>::adjust_fwd()
     {
         /* Move from end of a non-zero level to beginning of next level */
         if ((m_event_i == m_level->second.events.end()) &&
@@ -1130,20 +1134,20 @@ namespace discrete_distribution_details
             level_fwd();
     }
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_INLINE
     void
-    iterator<D>::adjust_rev()
+    iterator_base<I,T>::adjust_rev()
     {
         /* Move from beginning of a level to end of the previous non-zero level */
         if (m_event_i == m_level->second.events.begin())
             level_rev();
     }
-    
-    template<typename D>
+
+    template<typename I,typename T>
     DYNDIST_FLATTEN
     void
-    iterator<D>::level_fwd()
+    iterator_base<I,T>::level_fwd()
     {
         /* Move to the next level */
         DYNDIST_ASSERT(m_level_i != m_distribution->m_levels_nonzero.end());
@@ -1157,10 +1161,10 @@ namespace discrete_distribution_details
         m_event_i = m_level->second.events.begin();
     }
 
-    template<typename D>
+    template<typename I,typename T>
     DYNDIST_FLATTEN
     void
-    iterator<D>::level_rev()
+    iterator_base<I,T>::level_rev()
     {
         /* Move to the previous level */
         DYNDIST_ASSERT(m_level_i != m_distribution->m_levels_nonzero.begin());
@@ -1170,44 +1174,6 @@ namespace discrete_distribution_details
     }
     
     
-    /**
-     * \struct iterator_types
-     *
-     * Types for discrete_distribution non-const iterators
-     */
-    template<typename DistributionType>
-    struct iterator_types {
-        typedef DistributionType distribution_type;
-        typedef typename distribution_type::value_type value_type;
-        typedef typename distribution_type::pointer pointer;
-        typedef typename distribution_type::levels_collection_type::iterator
-        levels_iterator;
-        typedef typename distribution_type::level_events_type::iterator
-        events_iterator;
-        typedef typename distribution_type::levels_value_type
-        levels_value_type;
-    };
-    
-    
-    /**
-     * \struct const_iterator_types
-     *
-     * Types for discrete_distribution non-const iterators
-     */
-    template<typename DistributionType>
-    struct const_iterator_types {
-        typedef const DistributionType distribution_type;
-        typedef const typename distribution_type::value_type value_type;
-        typedef typename distribution_type::pointer pointer;
-        typedef typename distribution_type::levels_collection_type::const_iterator
-        levels_iterator;
-        typedef typename distribution_type::level_events_type::const_iterator
-        events_iterator;
-        typedef const typename distribution_type::levels_value_type
-        levels_value_type;
-    };
-    
-
     /**
      * \struct f_event_moved_nop
      *
@@ -1254,24 +1220,6 @@ public:
     typedef discrete_distribution_pointer<size_t, weight_type, data_type>
     pointer;
 
-    friend struct discrete_distribution_details::iterator_types
-    <discrete_distribution>;
-    friend struct discrete_distribution_details::iterator
-    <discrete_distribution_details::iterator_types<discrete_distribution> >;
-    
-    typedef discrete_distribution_details::iterator
-    <discrete_distribution_details::iterator_types<discrete_distribution> >
-    iterator;
-
-    friend struct discrete_distribution_details::const_iterator_types
-    <discrete_distribution>;
-    friend struct discrete_distribution_details::iterator
-    <discrete_distribution_details::const_iterator_types<discrete_distribution> >;
-
-    typedef discrete_distribution_details::iterator
-    <discrete_distribution_details::const_iterator_types<discrete_distribution> >
-    const_iterator;
-    
     /*
      * Meta-Distribution & Levels
      */
@@ -1317,7 +1265,79 @@ private:
     typedef typename level_data_type::template f_level_init
     <discrete_distribution>
     f_level_init;
-    
+
+    /*
+     * Iterators
+     */
+public:
+    struct iterator_types {
+        typedef discrete_distribution distribution_type;
+        typedef discrete_distribution::value_type value_type;
+        typedef discrete_distribution::pointer pointer;
+        typedef typename discrete_distribution::levels_collection_type::iterator levels_iterator;
+        typedef typename discrete_distribution::level_events_type::iterator events_iterator;
+        typedef discrete_distribution::levels_value_type levels_value_type;
+    };
+    struct iterator;
+    friend struct discrete_distribution_details::iterator_base<iterator, iterator_types>;
+    struct iterator : public discrete_distribution_details::iterator_base<iterator, iterator_types>
+    {
+        friend struct discrete_distribution_details::iterator_base<iterator, iterator_types>;
+        typedef discrete_distribution_details::iterator_base<iterator, iterator_types> super_type;
+
+        /** Creates an empty iterator. Dereferencing such an instance causes undefined behaviour  */
+        iterator()
+        {}
+
+        /** converts an iterator into a distribution_pointer */
+        DYNDIST_INLINE_FLATTEN
+        operator pointer () const
+        { return pointer(*this->m_level, *this->m_event_i); }
+
+    private:
+        DYNDIST_INLINE
+        iterator(const typename iterator_types::levels_iterator& level_i,
+                 typename iterator_types::levels_value_type& level,
+                 const typename iterator_types::events_iterator& event_i,
+                 typename iterator_types::distribution_type& distribution)
+                :super_type(level_i, level, event_i, distribution)
+        {}
+    };
+
+    struct const_iterator_types {
+        typedef const discrete_distribution distribution_type;
+        typedef const discrete_distribution::value_type value_type;
+        typedef discrete_distribution::pointer pointer;
+        typedef typename discrete_distribution::levels_collection_type::const_iterator levels_iterator;
+        typedef typename discrete_distribution::level_events_type::const_iterator events_iterator;
+        typedef const discrete_distribution::levels_value_type levels_value_type;
+    };
+    struct const_iterator;
+    friend struct discrete_distribution_details::iterator_base<const_iterator, const_iterator_types>;
+    struct const_iterator : public discrete_distribution_details::iterator_base<const_iterator, const_iterator_types>
+    {
+        friend struct discrete_distribution_details::iterator_base<const_iterator, const_iterator_types>;
+        typedef discrete_distribution_details::iterator_base<const_iterator, const_iterator_types> super_type;
+
+        /** Creates an empty iterator. Dereferencing such an instance causes undefined behaviour  */
+        const_iterator()
+        {}
+
+        /** Conversion from iterator to const_iterator */
+        const_iterator(const iterator& it)
+            :super_type(it.m_level_i, it.m_level, it.m_event_i, it.m_distribution)
+        {}
+
+    private:
+        DYNDIST_INLINE
+        const_iterator(const typename iterator_types::levels_iterator& level_i,
+                       typename iterator_types::levels_value_type& level,
+                       const typename iterator_types::events_iterator& event_i,
+                       typename iterator_types::distribution_type& distribution)
+                       :super_type(level_i, level, event_i, distribution)
+        {}
+    };
+
     /*
      * Construction & Destruction
      */
