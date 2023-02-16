@@ -1896,7 +1896,7 @@ std::numeric_limits<typename discrete_distribution<S,W,D,C>::size_t>::max() - 1;
 template<typename S,typename W,typename D,typename C>
 const typename discrete_distribution<S,W,D,C>::level_type
 discrete_distribution<S,W,D,C>::zero_level =
-std::numeric_limits<typename discrete_distribution<S,W,D,C>::level_type>::min();
+std::numeric_limits<typename discrete_distribution<S,W,D,C>::level_type>::min() + 1;
 
 template<typename S,typename W,typename D,typename C>
 const std::size_t
