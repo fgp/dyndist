@@ -3210,7 +3210,7 @@ discrete_distribution<S,W,D,C>::levels_nonzero_remove
     /* Replace level's entry with the last entry */
     levels_value_type*& nz = m_levels_nonzero[ld.link_nonzero];
     DYNDIST_ASSERT(nz == &level);
-    levels_value_type*& nz_last = m_levels_nonzero.back();
+    levels_value_type* nz_last = m_levels_nonzero.back();
     nz = nz_last;
     m_levels_nonzero.pop_back();
     
