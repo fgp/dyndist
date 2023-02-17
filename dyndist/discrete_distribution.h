@@ -3190,7 +3190,7 @@ discrete_distribution<S,W,D,C>::levels_updated_remove
         /* Replace level's entry with the last entry */
         levels_value_type*& ud = m_levels_updated[ld.link_updated];
         DYNDIST_ASSERT(ud == &level);
-        levels_value_type*& ud_last = m_levels_updated.back();
+        levels_value_type* ud_last = m_levels_updated.back();
         ud = ud_last;
         m_levels_updated.pop_back();
         
