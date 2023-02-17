@@ -1896,7 +1896,7 @@ std::numeric_limits<typename discrete_distribution<S,W,D,C>::size_t>::max() - 1;
 template<typename S,typename W,typename D,typename C>
 const typename discrete_distribution<S,W,D,C>::level_type
 discrete_distribution<S,W,D,C>::zero_level =
-std::numeric_limits<typename discrete_distribution<S,W,D,C>::level_type>::min() + 1;
+std::numeric_limits<typename discrete_distribution<S,W,D,C>::level_type>::min();
 
 template<typename S,typename W,typename D,typename C>
 const std::size_t
@@ -2989,7 +2989,11 @@ discrete_distribution<S,W,D,C>::update_totals_begin
         const level_type total_weight_log2ceil = log2ceil(m_total_weight);
         m_total_weight_lower = pow2(total_weight_log2ceil - SL, m_zero_weight);
         m_total_weight_upper = pow2(total_weight_log2ceil    , m_zero_weight);
-        m_level_tiny += (total_weight_log2ceil - m_level_total);
+		/* Shift tiny level by same amount as total_level shifts */
+		if (m_level_total != zero_level) {
+			DYNDIST_ASSERT(m_level_tiny != zero_level);
+			m_level_tiny += (total_weight_log2ceil - m_level_total);
+		}
         m_level_total = total_weight_log2ceil;
     }
     DYNDIST_ASSERT((m_total_weight_lower < m_total_weight) &&
