@@ -3,6 +3,9 @@ project(dyndist)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
+# Newer versions of Boost seem to require C++14 for Boost.Math
+set (CMAKE_CXX_STANDARD 14)
+
 include_directories(.)
 
 add_executable(dyndist_tests
