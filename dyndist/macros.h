@@ -85,13 +85,13 @@
     _Pragma("GCC diagnostic ignored \"-Wsign-compare\"") \
     _Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")
 #   define DYNDIST_NOWARN_ALL \
-    _Pragma("GCC diagnostic ignored \"-Wall\"")
+    _Pragma("GCC diagnostic ignored \"-Wall\"") \
     _Pragma("GCC diagnostic ignored \"-Wshadow\"") \
     _Pragma("GCC diagnostic ignored \"-Wsign-compare\"") \
     _Pragma("GCC diagnostic ignored \"-Wsign-conversion\"") \
     _Pragma("GCC diagnostic ignored \"-Wconversion\"") \
-    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"")
-    _Pragma("GCC diagnostic ignored \"-Wunused-variable\"")
+    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"") \
+    _Pragma("GCC diagnostic ignored \"-Wunused-variable\"") \
     _Pragma("GCC diagnostic ignored \"-Wdocumentation\"")
 #   define DYNDIST_NOWARN_POP \
     _Pragma("GCC diagnostic pop")
